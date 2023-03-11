@@ -1,12 +1,10 @@
 footer {
-    background-color:#00FF00;
-    height:60px;
-    width:100%;
-    position:fixed;
+    background-color: #00FF00;
+    height: 60px;
+    width: 100%;
     bottom: 0;
-}
-
-p {
-    text-align:center;
-    line-height:30px
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    line-height: 60px;
 }

@@ -1,76 +1,97 @@
 #!/usr/bin/python3
-import unittest
-import pep8
-import json
+"""Defines unittests for models/state.py.
+Unittest classes:
+    TestState_instantiation
+    TestState_save
+    TestState_to_dict
+"""
 import os
+import models
+import unittest
 from datetime import datetime
-from models.base_model import BaseModel
-from models.user import User
+from time import sleep
 from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.place import Place
-from models.review import Review
-from models.engine.file_storage import FileStorage
+from models import storage
+from models.base_model import BaseModel
 
 
-class TestStateDocs(unittest.TestCase):
-    """ check for documentation """
-    def test_class_doc(self):
-        """ check for class documentation """
-        self.assertTrue(len(State.__doc__) > 0)
+class TestState_instantiation(unittest.TestCase):
+    """Unittests for testing instantiation of the State class."""
 
+    def test_no_args_instantiates(self):
+        self.assertEqual(State, type(State()))
 
-class TestStatePep8(unittest.TestCase):
-    """ check for pep8 validation """
-    def test_pep8(self):
-        """ test base and test_base for pep8 conformance """
-        style = pep8.StyleGuide(quiet=True)
-        file1 = 'models/state.py'
-        file2 = 'tests/test_models/test_state.py'
-        result = style.check_files([file1, file2])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warning).")
+    def test_new_instance_stored_in_objects(self):
+        self.assertIn(State(), models.storage.all().values())
 
+    def test_id_is_public_str(self):
+        self.assertEqual(str, type(State().id))
 
-class TestState(unittest.TestCase):
-    """ tests for class State """
-    @classmethod
-    def setUpClass(cls):
-        """ set up instances for all tests """
-        cls.state = State()
+    def test_created_at_is_public_datetime(self):
+        self.assertEqual(datetime, type(State().created_at))
 
-    def test_subclass(self):
-        """ test that state is a subclass of basemodel """
-        self.assertIsInstance(self.state, BaseModel)
-        self.assertTrue(hasattr(self.state, "id"))
-        self.assertTrue(hasattr(self.state, "created_at"))
-        self.assertTrue(hasattr(self.state, "updated_at"))
+    def test_updated_at_is_public_datetime(self):
+        self.assertEqual(datetime, type(State().updated_at))
 
-    def test_id(self):
-        """ test id """
-        self.assertEqual(str, type(self.state.id))
+    def test_name_is_public_class_attribute(self):
+        st = State()
+        self.assertEqual(str, type(State.name))
+        self.assertIn("name", dir(st))
+        self.assertNotIn("name", st.__dict__)
 
-    def test_created_at(self):
-        """ test created_at """
-        self.assertEqual(datetime, type(self.state.created_at))
+    def test_two_states_unique_ids(self):
+        st1 = State()
+        st2 = State()
+        self.assertNotEqual(st1.id, st2.id)
 
-    def test_updated_at(self):
-        """ test updated_at """
-        self.assertEqual(datetime, type(self.state.updated_at))
+    def test_two_states_different_created_at(self):
+        st1 = State()
+        sleep(0.05)
+        st2 = State()
+        self.assertLess(st1.created_at, st2.created_at)
 
-    def test_name(self):
-        """ test name """
-        self.assertTrue(hasattr(self.state, "name"))
-        self.assertEqual(self.state.name, "")
+    def test_two_states_different_updated_at(self):
+        st1 = State()
+        sleep(0.05)
+        st2 = State()
+        self.assertLess(st1.updated_at, st2.updated_at)
 
-    def test_to_dict(self):
-        """ test to_dict method """
-        new_dict = self.state.to_dict()
-        self.assertEqual(type(new_dict), dict)
-        self.assertTrue('to_dict' in dir(self.state))
+    def test_str_representation(self):
+        dt = datetime.today()
+        dt_repr = repr(dt)
+        st = State()
+        st.id = "123456"
+        st.created_at = st.updated_at = dt
+        ststr = st.__str__()
+        self.assertIn("[State] (123456)", ststr)
+        self.assertIn("'id': '123456'", ststr)
+        self.assertIn("'created_at': " + dt_repr, ststr)
+        self.assertIn("'updated_at': " + dt_repr, ststr)
 
-    @classmethod
-    def tearDownClass(cls):
-        """ remove test instances """
-        pass
+    def test_args_unused(self):
+        st = State(None)
+        self.assertNotIn(None, st.__dict__.values())
+
+    def test_instantiation_with_kwargs(self):
+        dt = datetime.today()
+        dt_iso = dt.isoformat()
+        st = State(id="345", created_at=dt_iso, updated_at=dt_iso)
+        self.assertEqual(st.id, "345")
+        self.assertEqual(st.created_at, dt)
+        self.assertEqual(st.updated_at, dt)
+
+    def test_instantiation_with_None_kwargs(self):
+        with self.assertRaises(TypeError):
+            State(id=None, created_at=None, updated_at=None)
+
+    def test_8_instantiation(self):
+        """Tests instantiation of State class."""
+
+        b = State()
+        self.assertEqual(str(type(b)), "<class 'models.state.State'>")
+        self.assertIsInstance(b, State)
+        self.assertTrue(issubclass(type(b), BaseModel))
+    
+
+if __name__ == "__main__":
+    unittest.main()
