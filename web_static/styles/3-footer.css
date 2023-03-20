@@ -8,11 +8,5 @@ footer {
     justify-content: center;
     line-height: 60px;
     border-top: 1px solid #CCCCCC;
-    /* For alignment take This: */
-    /* text-align: center; */
-    /* line-height: 60px; */
-    /* OR */
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
+ 
 }
